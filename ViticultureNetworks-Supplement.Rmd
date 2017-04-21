@@ -1,7 +1,7 @@
 ---
-title: Online Supplement to Innovation, Cooperation and the Structure of Three Regional Sustainable Agriculture Networks in California
+title: Online Supplement to Innovation, Cooperation, and the Structure of Three Regional Sustainable Agriculture Networks in California
 subtitle: Regional Environmental Change
-author: "Michael Levy and Mark Lubell*"
+author: "Michael Levy* and Mark Lubell"
 date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output: pdf_document
 documentclass: article
@@ -41,7 +41,7 @@ samplesize = 1e4
 interval = 5e3
 ```
 
-*Corresponding author. Department of Environmental Science and Policy, University of California, Davis. mnlubell@ucdavis.edu
+*Corresponding author. Department of Environmental Science and Policy, University of California, Davis. malevy@ucdavis.edu
 
 
 
