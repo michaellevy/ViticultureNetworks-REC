@@ -1,0 +1,39 @@
+R version 3.3.3 (2017-03-06)
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+Running under: OS X El Capitan 10.11.6
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] netUtils_0.1.0       cowplot_0.7.0        intergraph_2.0-2    
+ [4] stargazer_5.2        devtools_1.12.0      viridis_0.3.4       
+ [7] knitr_1.15.1         statnet_2016.4       sna_2.4             
+[10] ergm.count_3.2.2     tergm_3.4.0          networkDynamic_0.9.0
+[13] ergm_3.6.0           network_1.13.0       statnet.common_3.3.0
+[16] dplyr_0.5.0          purrr_0.2.2          readr_1.0.0         
+[19] tidyr_0.6.1          tibble_1.2           ggplot2_2.2.1       
+[22] tidyverse_1.1.1     
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.9       lubridate_1.6.0   lattice_0.20-34  
+ [4] gtools_3.5.0      assertthat_0.1    rprojroot_1.2    
+ [7] digest_0.6.12     psych_1.6.12      R6_2.2.0         
+[10] plyr_1.8.4        backports_1.0.5   evaluate_0.10    
+[13] coda_0.19-1       httr_1.2.1        lazyeval_0.2.0   
+[16] readxl_0.1.1      Matrix_1.2-8      rmarkdown_1.3    
+[19] stringr_1.2.0     foreign_0.8-67    munsell_0.4.3    
+[22] broom_0.4.2       modelr_0.1.0      mnormt_1.5-5     
+[25] htmltools_0.3.5   gridExtra_2.2.1   lpSolve_5.6.13   
+[28] withr_1.0.2       MASS_7.3-45       grid_3.3.3       
+[31] nlme_3.1-131      jsonlite_1.4      gtable_0.2.0     
+[34] DBI_0.6           magrittr_1.5      scales_0.4.1     
+[37] stringi_1.1.5     reshape2_1.4.2    robustbase_0.92-7
+[40] xml2_1.1.1        trust_0.1-7       tools_3.3.3      
+[43] forcats_0.2.0     DEoptimR_1.0-8    hms_0.3          
+[46] yaml_2.1.14       colorspace_1.3-2  rvest_0.3.2      
+[49] memoise_1.0.0     haven_1.0.0      

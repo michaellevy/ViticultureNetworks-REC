@@ -1,0 +1,193 @@
+---
+title: Online Supplement to Innovation, Cooperation and the Structure of Three Regional Sustainable Agriculture Networks in California
+subtitle: Regional Environmental Change
+author: "Michael Levy and Mark Lubell*"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output: pdf_document
+documentclass: article
+csl: regional-environmental-change.csl
+bibliography: ViticultureNetworks.bib
+---
+
+
+
+```{r R setup, include = FALSE}
+# Check for needed packages and install if missing
+cranPackages = c("tidyverse", "statnet", "knitr", "viridis", "xtable")
+toInstall = cranPackages[!(cranPackages %in% installed.packages()[, "Package"])]
+if(length(toInstall)) 
+  install.packages(toInstall)
+# Install the author's network utilities package from github
+if(!"netUtils" %in% installed.packages()[, "Package"])
+  devtools::install_github(repo = "michaellevy/netUtils")
+# Attach all the packages
+lapply(c(cranPackages, "netUtils"), library, char = TRUE)
+
+# Load data
+networks = readRDS("networks.RDS")
+ergms = readRDS("data/models.RDS")
+
+# Set document options for code chunk output
+opts_chunk$set(cache = TRUE, fig.height = 2.5, fig.width = 6.5,
+               echo = FALSE, results = "hide", message = FALSE, warning = FALSE)
+# Set ggplot options
+theme_set(theme_bw(base_size = 9))
+# Assign a color to each region for plotting
+regColors = structure(viridis_pal(option = "C")(3), names = names(networks))
+# Define number of simulations for each region for CUG tests
+nsim = 1e3
+# ERGM estimation parameters
+samplesize = 1e4
+interval = 5e3
+```
+
+*Corresponding author. Department of Environmental Science and Policy, University of California, Davis. mnlubell@ucdavis.edu
+
+
+
+# Supplementary Methods
+
+## ERGMs
+
+The ERGM likelihood is:
+
+\begin{align}
+P(Y = \mathbf{y}) = \dfrac{exp(\theta^\top\Gamma(\mathbf{y}, x_y))}
+{\sum_{z \in \mathcal{Y}}exp(\theta^\top\Gamma(\mathbf{z}, x_z))}, \mathbf{y} \in \mathcal{Y}
+\end{align}
+
+where $\Gamma$ is a vector of sufficient statistics calculated on the network $\mathbf{y}$ and covariate information on the network $x_y$, $\theta$ is the corresponding vector of parameter values, and $\mathcal{Y}$ is the set of possible networks [@frank_markov_1986; @lusher_exponential_2012; @morris_specification_2008].
+
+We obtained parameter estimates for our ERGMs using Markov chain Monte Carlo maximum likelihood estimation (MCMCMLE) [@handcock_statnet:_2016; @hunter_ergm:_2008]. For each network, we used a burn-in interval of `r format(interval * 16, big.mark = ",", trim = TRUE)` draws followed by `r format(samplesize, big.mark = ",", trim = TRUE)` samples taken at an interval of `r format(interval, big.mark = ",", trim = TRUE)` draws. MCMC and goodness-of-fit diagnostics are presented below.
+
+
+### Geometrically-weighted statistics
+
+The geometrically-weighted statistics are sums with decreasing weights for additional units on a given node or edge. For example, any edge augments the GWD statistic, but if the edge is added to higher degree nodes, the statistic increases less than if it were added to a lower degree node. Thus, GWD "may be thought of as a sort of anti-preferential attachment model term" [@hunter_curved_2007], and in this manner parameterizes the degree distribution of a network. The rate of decreasing return as edges are added to higher degree nodes is governed by the $\theta_s$ decay parameter. Small values of $\theta_s$ yield a greater disparity between edges to low- and high-degree nodes. For intuition on the relationship between GWD, $\theta_s$, and the degree distribution, see ref [@levy_gwdegree:_2016]. GWESP is similar to a statistic that counts the number of edges with a shared partner (i.e. three times the number of triangles), but with decreasing effect of each shared partner after the first. The rate of decrease is controled by $\theta_t$, with smaller values producing a rapidly diminishing effect of additional shared partners. Specifically, the GWD and GWESP statistics are given by:
+
+\begin{align}
+GWD = e^{\theta_s} \sum_{i=1}^{N-1}[1-(1-e^{-\theta_s})^{i}]D_i(\mathbf{y});
+\end{align}
+
+\begin{align}
+GWESP = e^{\theta_t} \sum_{i=1}^{N-2}[1-(1-e^{-\theta_t})^{i}]EP_i(\mathbf{y}),
+\end{align}
+
+where $D_i$ is the number of nodes of degree $i$ and $EP_i$ is the number of edges with $i$ shared partners. We fixed decay parameter values and held them constant across all three networks to facilitate comparison of the parameter estimates. For GWD, $\theta_s = 3.0$ ensures that the statistic captures popularity effects among high degree nodes. For GWESP, $\theta_t = 0.7$ produces a moderately declining marginal effect of shared partners.
+
+
+### Modeled edge probabilities
+
+The probability of observing a tie between nodes $i$ and $j$ is:
+
+\begin{align}
+P(y_{ij} | \mathbf{y}_{ij}^-, \theta) = logistic(\theta^\top \delta_{\Gamma}(\mathbf{y}_{ij})),
+\end{align}
+
+where $\delta_{\Gamma}(\mathbf{y}_{ij})$ is a vector of change statistics associated with the $ij$ edge given by $\Gamma(\mathbf{y}_{ij}^+) - \Gamma(\mathbf{y}_{ij}^-)$, where $\mathbf{y}_{ij}^+$ is the network with the $ij$ tie present and $\mathbf{y}_{ij}^-$ with the $ij$ tie absent, and logistic is the inverse logit function: $(1+e^{-x})^{-1}$ [@hunter_ergm:_2008; @desmarais_micro-level_2012].
+
+We parse edge probabilities by both nodal and dyadic attributes. Parsing edge probabilities by nodal attributes (profession and degree) results in each dyad being included twice, once for each actor in the dyad.
+
+
+# Supplementary Results
+
+## Descriptive Statistics
+
+
+```{r descriptives, results="asis"}
+des = 
+  lapply(networks, function(n) {
+    data.frame(
+      Actors = network.size(n),
+      `Average Number Ties` = 2 * network.edgecount(n) / network.size(n), 
+      Density = network.density(n),
+      Connectedness = connectedness(n),
+      HMPL = HMPL(n),
+      `Degree Centralization` = centralization(n, "degree", mode = "graph"),
+      Clustering = clusteringCoef(n)
+    )
+  }) %>% 
+  do.call(rbind, .) %>%
+  t() 
+dig = cbind(rep(0, 7),
+            matrix(rep(c(0, 1, 4, 2, 1, 3, 3), each = 3), byrow = TRUE, ncol = 3))
+rownames(des) = gsub("\\.", " ", rownames(des))
+xt = xtable(des, align = "lccc", digits = dig)
+print(xt, comment = FALSE)
+```
+
+
+## Degree Distributions
+
+```{r degree distributions}
+dd = lapply(1:3, function(i) {
+  d = degDist(networks[[i]], df = TRUE)
+  d$region = names(networks)[i]
+  d
+}) %>% do.call(rbind, .) %>%
+  filter(p > 0)
+dd$degree = as.integer(as.character(dd$degree))
+dd$region = factor(dd$region, levels = names(networks))
+
+ggplot(dd, aes(x = degree, y = p)) +
+  geom_point(aes(fill = region), size = 3, shape = 21) +
+  scale_fill_manual(values = regColors, guide = "none") +
+  scale_x_log10() +
+  annotation_logticks(sides = "bl") +
+  scale_y_log10(
+    breaks = 10^(0:-3),
+    labels = c("1", parse(text = "10^-1"), parse(text = "10^-2"), parse(text = "10^-3"))
+  ) +
+  xlab("Degree") + ylab("Proportion of nodes") +
+  facet_wrap(~ region, ncol = 3) 
+```
+
+\newpage
+
+## ERGM Goodness-of-fit
+
+```{r gof setup}
+if(!file.exists("data/gofs.RDS")) {
+  set.seed(572957)
+  gofs = vector("list", 3)
+  for(net in 1:3) {
+    gofs[[net]] = gof(ergms[[net]])  
+  }
+  saveRDS(gofs, "data/gofs.RDS")
+} else {
+  gofs = readRDS("data/gofs.RDS")
+}
+
+```
+
+
+```{r, fig.width = 6.5, fig.height = 3}
+par(mfrow = c(1, 3))
+lapply(1:3, function(i) plot(gofs[[i]], main = names(networks)[i]))
+```
+
+\newpage
+
+## ERGM MCMC Diagnostics
+
+### Central Coast
+
+```{r, dev = "quartz_png", fig.width = 6.5, fig.height = 9}
+mcmc.diagnostics(ergms[[1]], vars.per.page = 7)
+```
+
+### Napa
+
+```{r, dev = "quartz_png", fig.width = 6.5, fig.height = 9}
+mcmc.diagnostics(ergms[[2]], vars.per.page = 7)
+```
+
+### Lodi
+
+```{r, dev = "quartz_png", fig.width = 6.5, fig.height = 9}
+mcmc.diagnostics(ergms[[3]], vars.per.page = 7)
+```
+
+\newpage
+
+# References
